@@ -1,5 +1,6 @@
 import os
 import copy
+import sys
 
 NUMBER_OF_DISKS = 5
 
@@ -57,44 +58,66 @@ def player_move(move, positionList):
     topDisks = {'A': topA, 'B': topB, 'C': topC}
     landingArea = {'A': landingA, 'B': landingB, 'C': landingC}
 
+    if len(move) == 1:
+        if landingB == 0 or landingC == 0:
+            return 'win'
+        return
+
     if topDisks[move[0]] == 0:
-        return 'NoDiskError', topDisks[move[0]], topDisks[move[1]]
+        print(f'\nThere is no disk to move in {move[0]}.')
+        return
     elif topDisks[move[1]] != 0:
         if topDisks[move[0]] > topDisks[move[1]]:
-            return 'DiskError', topDisks[move[0]], topDisks[move[1]]
+            print(
+                f'\nIncorrect move, top disk in {move[0]}({topDisks[move[0]]})'
+                f' is larger than {move[1]}({topDisks[move[1]]}).')
+            return
     elif topDisks[move[0]] == topDisks[move[1]]:
-        return 'EmptyDiskError', topDisks[move[0]], topDisks[move[1]]
+        print('\nIncorrect move, both rods are empty.')
+        return
 
     positionList[landingArea[move[1]]][rodNumber[move[1]]] = topDisks[move[0]]
     positionList[landingArea[move[0]] + 1][rodNumber[move[0]]] = 0
-    return positionList, topDisks[move[0]], topDisks[move[1]]
+    return positionList
 
 
 def let_the_game_begin(positionList):
     print('\nWelcome to Tower of Hanoi.')
     print('Move the entire stack of disks to another rod to win the game.')
-    print("\nSample move: Typing 'AB' moves the top disk on rod A to rod B")
+    print("\nSample move: Typing 'AB' moves the top disk on rod A to rod B.")
+    moveNumber = 0
 
     while True:
         print('\nEnter a move.')
         print_position(positionList)
+
+        if player_move('A', positionList) == 'win':
+            break
+
         playerMove = input()
         if playerMove not in possibleMoves:
             os.system('cls')
             print(f"\nThere is no such move called {playerMove}. Possible moves are:\n{', '.join(possibleMoves)}")
             continue
 
-        moveResult, topDisk1, topDisk2 = player_move(playerMove, positionList)
-        if moveResult == 'DiskError':
-            print(
-                f'\nIncorrect move, top disk in {playerMove[0]}({topDisk1})'
-                f' is larger than {playerMove[1]}({topDisk2}).')
-        elif moveResult == 'EmptyDiskError':
-            print('\nIncorrect move, both rods are empty.')
-        elif moveResult == 'NoDiskError':
-            print(f'\nThere is no disk to move in {playerMove[0]}.')
+        moveResult = player_move(playerMove, positionList)
+        if moveResult is None:
+            continue
+        moveNumber += 1
+        positionList = moveResult
+
+    while True:
+        print()
+        print_position(positionList)
+        print(f'\nCongratulations! You won in {moveNumber} moves.')
+        print('\nPress \'a\' to play again, \'q\' to exit.')
+        decision = input()
+        if decision == 'a':
+            let_the_game_begin(copy.deepcopy(startingPosition))
+        elif decision == 'q':
+            sys.exit()
         else:
-            positionList = moveResult
+            continue
 
 
-let_the_game_begin(startingPosition)
+let_the_game_begin(copy.deepcopy(startingPosition))
