@@ -29,31 +29,43 @@ def print_position(positionList):
     print('A'.center(24), 'B'.center(24), 'C'.center(22), '\n')
 
 
-def get_top_disk(positionList):
+def landing_area_loop(list):
+    landingArea = 0
+    for row in list:
+        if row != 0:
+            return row, landingArea - 1
+        landingArea += 1
+    return 0, landingArea - 1
+
+
+def get_landing_area(positionList):
     A = [positionList[i][0] for i in range(len(positionList))]
     B = [positionList[i][1] for i in range(len(positionList))]
     C = [positionList[i][2] for i in range(len(positionList))]
-    topA, topB, topC = max(A), max(B), max(C)
-    return topA, topB, topC
 
-# TODO get_landing_area
+    topA, landingA = landing_area_loop(A)
+    topB, landingB = landing_area_loop(B)
+    topC, landingC = landing_area_loop(C)
+
+    return topA, topB, topC, landingA, landingB, landingC
 
 
 def player_move(move, positionList):
     if move not in possibleMoves:
         print(f"\nThere is no such move called {move}. Possible moves are:\n{', '.join(possibleMoves)}")
         print()
-    A, B, C = get_top_disk(positionList)
+    topA, topB, topC, landingA, landingB, landingC = get_landing_area(positionList)
+    topDisks = {'A': topA, 'B': topB, 'C': topC}
 
-    if eval(move[0]) < eval(move[1]):
+    if topDisks[move[0]] < topDisks[move[1]]:
         print(
-            f'\nIncorrect move, top disk in {move[0]}({eval(move[0])})'
-            f' is smaller than {move[1]}({eval(move[1])}).')
-    elif eval(move[0]) == eval(move[1]):
+            f'\nIncorrect move, top disk in {move[0]}({topDisks[move[0]]})'
+            f' is smaller than {move[1]}({topDisks[move[1]]}).')
+    elif topDisks[move[0]] == topDisks[move[1]]:
         print('\nIncorrect move, both rods are empty.')
 
     
-inp = 'BA'
+inp = 'AC'
 player_move(inp, startingPosition)
 
 for i in startingPosition:
